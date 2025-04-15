@@ -1,6 +1,8 @@
 # javascript stuff   
 
+```
 sudo npm install express
 sudo npm install cors
 
-node app
+node catch-cors-server.js
+```
