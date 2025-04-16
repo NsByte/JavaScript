@@ -2,20 +2,26 @@ const fs = require('fs');
 const https = require('https');
 const express = require('express');
 const cors = require('cors');
+const serveIndex = require('serve-index');
+const path = require('path');
 
 const app = express();
-const port = 443; // HTTPS port
+const port = 443;
 
-// Load SSL certificate and private key
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/<domain>/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/<domain>/fullchain.pem', 'utf8');
-
+// SSL certs
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/ninja.lbvd.nl/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/ninja.lbvd.nl/fullchain.pem', 'utf8');
 const credentials = { key: privateKey, cert: certificate };
 
 // Enable CORS
 app.use(cors());
 
-// Your existing route
+// Serve files + directory listing from current working directory
+const cwd = process.cwd();
+app.use('/', express.static(cwd));
+app.use('/', serveIndex(cwd, { icons: true }));
+
+// API route
 app.get('/api', (req, res) => {
   const { data } = req.query;
 
@@ -37,5 +43,5 @@ app.get('/api', (req, res) => {
 
 // Create HTTPS server
 https.createServer(credentials, app).listen(port, () => {
-  console.log(` ^=^t^r HTTPS Server running at https://0.0.0.0:${port}`);
+  console.log(`Server running at https://0.0.0.0:${port}`);
 });
